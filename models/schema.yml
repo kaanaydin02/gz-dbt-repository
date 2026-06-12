@@ -1,12 +1,27 @@
 version: 2
 
-sources:
-  - name: raw
-    schema: gz_raw_data
-    tables:
-      - name: sales
-        identifier: raw_gz_sales
-      - name: product
-        identifier: raw_gz_product
-      - name: ship
-        identifier: raw_gz_ship
+models:
+  - name: stg_raw__sales
+    description: "Greenweez satış verilerinin temizlenmiş ve pdt_id sütununun products_id olarak değiştirilmiş aşama modeli."
+    tests:
+      # Satış tablosunda benzersizliği doğrulamak için composite key testi
+      - unique:
+          column_name: "(orders_id || '-' || products_id)"
+
+  - name: stg_raw__product
+    description: "Ürün bilgilerini içeren, fiyat hataları düzeltilmiş aşama modeli."
+    columns:
+      - name: products_id
+        description: "Ürün tablosunun birincil anahtarı"
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_raw__ship
+    description: "Kargo ve operasyonel maliyetleri içeren, mükerrer sütunlardan arındırılmış aşama modeli."
+    columns:
+      - name: orders_id
+        description: "Sipariş tablosunun birincil anahtarı"
+        tests:
+          - unique
+          - not_null
